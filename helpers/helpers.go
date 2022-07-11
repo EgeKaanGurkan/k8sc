@@ -7,6 +7,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -28,7 +29,8 @@ type ContextNested struct {
 }
 
 type Config struct {
-	PreviousContext Context `json:"previousContext"`
+	PreviousContext            Context           `json:"previousContext"`
+	ContextNameToLastNamespace map[string]string `json:"contextNameToLastNamespace"`
 }
 
 // GetContexts returns all contexts defined in the kube config file.
@@ -73,6 +75,33 @@ func GetAvailableContextNames() []string {
 
 func GetAvailableContextNamesForAutocomplete(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return GetAvailableContextNames(), cobra.ShellCompDirectiveNoFileComp
+}
+
+func GetAvailableNamespaces() []string {
+	output := ExecuteKubectlCommand("get", "namespace")
+	splitOutput := strings.Split(output, "\n")[1:]
+	var namespaces []string
+
+	for _, out := range splitOutput {
+		namespaces = append(namespaces, strings.Split(out, " ")[0])
+	}
+
+	return namespaces
+}
+
+func ExecuteKubectlCommand(args ...string) string {
+	command := exec.Command("kubectl", args...)
+	buff := new(strings.Builder)
+
+	command.Stdout = buff
+
+	err := command.Run()
+	if err != nil {
+		logrus.Fatalf("en error occured while running the command: %e", err)
+	}
+
+	output := buff.String()
+	return output
 }
 
 func GetCurrentContext() Context {
@@ -136,6 +165,31 @@ func SwitchContext(contextName string) (string, error) {
 
 func SwitchContextByObject(context Context) (string, error) {
 	return SwitchContext(context.Name)
+}
+
+func SwitchNamespace(namespace string) string {
+	context := GetCurrentContext()
+	output := ExecuteKubectlCommand("config", "set-context", "--current", "--namespace", namespace)
+
+	config := GetConfigObject()
+
+	config.ContextNameToLastNamespace[context.Name] = context.Context.Namespace
+
+	UpdateConfigFile(config)
+
+	return output
+}
+
+func GetPreviousNamespaceOfContext(context Context) (string, error) {
+	config := GetConfigObject()
+
+	previousNamespace, exists := config.ContextNameToLastNamespace[context.Name]
+
+	if !exists {
+		return "", errors.New("please switch to a new namespace by using the 'ns' command first")
+	}
+
+	return previousNamespace, nil
 }
 
 func GetConfigFile() (*os.File, func()) {

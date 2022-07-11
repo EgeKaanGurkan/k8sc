@@ -99,6 +99,8 @@ func initialSetup(verbose bool) {
 	if len(fileContents) == 0 {
 		var config helpers.Config
 
+		config.ContextNameToLastNamespace = make(map[string]string)
+
 		jsonData, err := json.MarshalIndent(config, "", " ")
 		if err != nil {
 			logrus.Fatalf("could not initiate the config file: %s", err.Error())
