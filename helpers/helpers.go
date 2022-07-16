@@ -61,6 +61,8 @@ func GetContexts() []Context {
 	return contexts
 }
 
+// GetAvailableContextNames returns the available context names as defined in the
+// kubeconfig file
 func GetAvailableContextNames() []string {
 
 	contexts := GetContexts()
@@ -73,10 +75,13 @@ func GetAvailableContextNames() []string {
 	return returnArr
 }
 
+// GetAvailableContextNamesForAutocomplete uses GetAvailableContextNames and returns the array of
+// context names as compliant with Cobra's definition
 func GetAvailableContextNamesForAutocomplete(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return GetAvailableContextNames(), cobra.ShellCompDirectiveNoFileComp
 }
 
+// GetAvailableNamespaces returns a list of namespace names for the current context
 func GetAvailableNamespaces() []string {
 	output := ExecuteKubectlCommand("get", "namespace")
 	splitOutput := strings.Split(output, "\n")[1:]
@@ -89,6 +94,20 @@ func GetAvailableNamespaces() []string {
 	return namespaces
 }
 
+func GetAvailableNodes() []string {
+	output := ExecuteKubectlCommand("get", "node")
+	splitOutput := strings.Split(output, "\n")[1:]
+	var nodes []string
+
+	for _, out := range splitOutput {
+		nodes = append(nodes, strings.Split(out, " ")[0])
+	}
+
+	return nodes
+}
+
+// ExecuteKubectlCommand is a convenience function used to execute Kubectl commands and
+// get their output
 func ExecuteKubectlCommand(args ...string) string {
 	command := exec.Command("kubectl", args...)
 	buff := new(strings.Builder)
@@ -97,13 +116,14 @@ func ExecuteKubectlCommand(args ...string) string {
 
 	err := command.Run()
 	if err != nil {
-		logrus.Fatalf("en error occured while running the command: %e", err)
+		logrus.Fatalf("en error occured while running the kubectl command: %s", err.Error())
 	}
 
 	output := buff.String()
 	return output
 }
 
+// GetCurrentContext returns the current context as a Context struct.
 func GetCurrentContext() Context {
 	command := exec.Command("kubectl", "config", "view", "-o", "jsonpath='{.current-context}'")
 	buff := new(strings.Builder)
@@ -128,6 +148,8 @@ func GetCurrentContext() Context {
 	return context
 }
 
+// ContextNameToObject receives a context name and returns
+// its corresponding Context struct
 func ContextNameToObject(contextName string) (Context, error) {
 	contexts := GetContexts()
 
@@ -140,6 +162,7 @@ func ContextNameToObject(contextName string) (Context, error) {
 	return Context{}, fmt.Errorf("no context with name %s", contextName)
 }
 
+// SwitchContext switches the context, given a context name.
 func SwitchContext(contextName string) (string, error) {
 
 	previousContext := GetCurrentContext()
@@ -163,10 +186,12 @@ func SwitchContext(contextName string) (string, error) {
 	return output, nil
 }
 
+// SwitchContextByObject switches the context, given  Context struct.
 func SwitchContextByObject(context Context) (string, error) {
 	return SwitchContext(context.Name)
 }
 
+// SwitchNamespace switches namespace given its name.
 func SwitchNamespace(namespace string) string {
 	context := GetCurrentContext()
 	output := ExecuteKubectlCommand("config", "set-context", "--current", "--namespace", namespace)

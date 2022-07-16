@@ -30,7 +30,7 @@ var nsCmd = &cobra.Command{
 
 		output := helpers.SwitchNamespace(selectedNamespace)
 
-		fmt.Println(output)
+		fmt.Print(output)
 	},
 }
 

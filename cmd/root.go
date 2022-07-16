@@ -35,9 +35,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		initialSetup(Verbose)
-	},
+	PersistentPreRun: initialSetup,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if displayVersion {
@@ -67,10 +65,10 @@ func Execute() {
 	}
 }
 
-func initialSetup(verbose bool) {
+func initialSetup(cmd *cobra.Command, args []string) {
 
 	// set logging level
-	if verbose {
+	if Verbose {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
@@ -112,7 +110,7 @@ func initialSetup(verbose bool) {
 		}
 	}
 
-	if verbose {
+	if Verbose {
 		fmt.Println("Config File Contents")
 		fmt.Printf("%s\n", fileContents)
 	}
@@ -130,9 +128,9 @@ func init() {
 	// will be global for your application.
 
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.k8sc.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "Verbose", "V", false, "Verbose mode")
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "Verbose", "V", false, "verbose mode")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolVarP(&displayVersion, "version", "v", false, "Display current version")
+	rootCmd.Flags().BoolVarP(&displayVersion, "version", "v", false, "display current version")
 }
