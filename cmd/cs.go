@@ -22,7 +22,11 @@ var csCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 1 {
-			fmt.Println(fmt.Errorf("please provide a context"))
+			fmt.Println(fmt.Errorf("please provide a context from the list below"))
+			availableContexts := helpers.GetAvailableContextNames()
+			for _, context := range availableContexts {
+				fmt.Println(context)
+			}
 			os.Exit(1)
 		}
 

@@ -1,7 +1,7 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
+Copyright © 2022 EGE KAAN GURKAN
 */
+
 package cmd
 
 import (
@@ -50,6 +50,8 @@ var gpCmd = &cobra.Command{
 	},
 }
 
+// getAvailableNodesForAutocomplete returns the available nodes as a string array and also a cobra autocomplete
+// directive stating that we don't want file autocompletion for this context.
 func getAvailableNodesForAutocomplete(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return helpers.GetAvailableNodes(), cobra.ShellCompDirectiveNoFileComp
 }

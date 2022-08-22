@@ -11,6 +11,8 @@ PS: The package is not released on any package manager at the moment, however, m
 surely be added. For now, to use the tool, you can install it manually using `go build` and then moving the binary to 
 `/usr/local/bin` for UNIX based systems.
 
+### *Seeking contributors and new ideas!*
+
 ### Features
 
 Print current context: `k8sc`

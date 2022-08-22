@@ -27,14 +27,8 @@ var ConfigPath = fmt.Sprintf("%s/%s", ConfigDir, ConfigFile)
 var rootCmd = &cobra.Command{
 	Use:   "k8sc",
 	Short: "A convenience script for kubectl",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
+	Long: `The k8sc script aims to ease the use if kubectl, especially for commands that are used daily
+which take too long to type out and those that are overall convenient, like switching to a previous namespace.`,
 	PersistentPreRun: initialSetup,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -128,7 +122,7 @@ func init() {
 	// will be global for your application.
 
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.k8sc.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "Verbose", "V", false, "verbose mode")
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "V", false, "verbose mode")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

@@ -2,7 +2,7 @@
 Copyright © 2022 EGE KAAN GURKAN
 */
 
-// Package helpers contains a set of functions that are used
+// Package helpers contains a set of functions that are used in many files.
 package helpers
 
 import (
@@ -44,7 +44,7 @@ func GetContexts() []Context {
 
 	err := command.Run()
 	if err != nil {
-		logrus.Fatalf("en error occured while running the command: %e", err)
+		logrus.Fatalf("en error occurred while running the command: %e", err)
 	}
 
 	output := strings.Split(buff.String()[1:len(buff.String())-1], " ")
@@ -53,7 +53,7 @@ func GetContexts() []Context {
 		var ctx Context
 		err := json.Unmarshal([]byte(context), &ctx)
 		if err != nil {
-			logrus.Fatalf("an error occured while unmarshalling context: %e", err)
+			logrus.Fatalf("an error occurred while unmarshalling context: %e", err)
 		}
 		contexts = append(contexts, ctx)
 	}
@@ -94,6 +94,7 @@ func GetAvailableNamespaces() []string {
 	return namespaces
 }
 
+// GetAvailableNodes returns a string array, consisting of the available nodes' hostnames.
 func GetAvailableNodes() []string {
 	output := ExecuteKubectlCommand("get", "node")
 	splitOutput := strings.Split(output, "\n")[1:]
@@ -116,7 +117,7 @@ func ExecuteKubectlCommand(args ...string) string {
 
 	err := command.Run()
 	if err != nil {
-		logrus.Fatalf("en error occured while running the kubectl command: %s", err.Error())
+		logrus.Fatalf("en error occurred while running the kubectl command: %s", err.Error())
 	}
 
 	output := buff.String()
@@ -132,7 +133,7 @@ func GetCurrentContext() Context {
 
 	err := command.Run()
 	if err != nil {
-		logrus.Fatalf("en error occured while running the command: %e", err)
+		logrus.Fatalf("en error occurred while running the command: %e", err)
 	}
 
 	output := buff.String()
@@ -186,7 +187,7 @@ func SwitchContext(contextName string) (string, error) {
 	return output, nil
 }
 
-// SwitchContextByObject switches the context, given  Context struct.
+// SwitchContextByObject switches the context, given a Context struct.
 func SwitchContextByObject(context Context) (string, error) {
 	return SwitchContext(context.Name)
 }
@@ -205,6 +206,7 @@ func SwitchNamespace(namespace string) string {
 	return output
 }
 
+// GetPreviousNamespaceOfContext returns the namespace that was previously switched to while on this context.
 func GetPreviousNamespaceOfContext(context Context) (string, error) {
 	config := GetConfigObject()
 
@@ -217,6 +219,7 @@ func GetPreviousNamespaceOfContext(context Context) (string, error) {
 	return previousNamespace, nil
 }
 
+// GetConfigFile returns the config file descriptor and a defer function to close the file.
 func GetConfigFile() (*os.File, func()) {
 	file, err := os.OpenFile(os.ExpandEnv("$HOME/.k8sc/config.json"), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -233,6 +236,7 @@ func GetConfigFile() (*os.File, func()) {
 	return file, deferFunction
 }
 
+// GetConfigObject marshals and returns the contents of the config file into a Context struct.
 func GetConfigObject() Config {
 	file, deferFunction := GetConfigFile()
 	defer deferFunction()
@@ -252,6 +256,7 @@ func GetConfigObject() Config {
 	return config
 }
 
+// UpdateConfigFile updates the config file based on the new config struct given.
 func UpdateConfigFile(newConfig Config) {
 	configFile, deferFunction := GetConfigFile()
 	defer deferFunction()
